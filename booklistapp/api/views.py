@@ -25,6 +25,7 @@ class BookDetailAV(APIView):
             book  = Book.objects.get(pk=pk)
         except Book.DoesNotExist:
             return Response({'Error': 'Book not found'}, status=status.HTTP_404_NOT_FOUND)
+        
         serializer = BookSerializer(book)
         return Response(serializer.data)
 
@@ -42,7 +43,7 @@ class BookDetailAV(APIView):
         book.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class PublishersListAV(APIView):
+class PublisherListAV(APIView):
     def get(self, request):
         publisher = Publisher.objects.all()
         serializer = PublisherSerializer(publisher, many=True)
@@ -55,6 +56,31 @@ class PublishersListAV(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:   
             return Response(serializer.errors)
+
+
+class PublisherDetailAV(APIView):
+    def get(self, request, pk):
+        try:
+            publisher  = Publisher.objects.get(pk=pk)
+        except Publisher.DoesNotExist:
+            return Response({'Error': 'Publisher not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = PublisherSerializer(publisher)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        publisher  = Publisher.objects.get(pk=pk)
+        serializer = PublisherSerializer(publisher, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        publisher = Publisher.objects.get(pk=pk)
+        publisher.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # @api_view(['GET', 'POST'])

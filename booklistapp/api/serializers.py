@@ -1,16 +1,36 @@
+from dataclasses import fields
+from pyexpat import model
 from rest_framework import serializers
-from booklistapp.models import Book, Publisher
+from booklistapp.models import Book, Publisher, Review
+
+# Why to use serializer?
+# As when we were doing it in views then we had to
+# change it in the iterable form and then send a JSONresponse()
+# But serializer simplifies it. It directly does that.
+# here after conversion to JSON we call it in api/views 
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = "__all__"
+
 
 class BookSerializer(serializers.ModelSerializer):
-    len_name = serializers.SerializerMethodField()
+    reviews = ReviewSerializer(many=True, read_only = True)
+    # read_only means while adding book or magazine then we cant add review at that time
+    # we can add review through review serializer only
 
+    len_name = serializers.SerializerMethodField()
+    # to be used for Custom serializer field method
+    # if we dont have model for this then also we can display it in
+    # our JSON response
     class Meta:
         model = Book
         fields = "__all__"
         # fields = ['id', 'title', 'description'] or simply use exclude
         # exclude = ['active']
 
-    def get_len_name(self, object):
+    def get_len_name(self, object): # Custom serializer field method
         return len(object.title)
 
     def validate(self, data):
@@ -24,9 +44,13 @@ class BookSerializer(serializers.ModelSerializer):
         return value
 
 class PublisherSerializer(serializers.ModelSerializer):
+    book = BookSerializer(many=True, read_only=True)
     class Meta:
         model = Publisher
         fields = "__all__"
+
+
+
 
 # def name_length(value):
 #     if len(value) < 2:
