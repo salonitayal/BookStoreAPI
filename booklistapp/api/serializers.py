@@ -12,7 +12,8 @@ from booklistapp.models import Book, Publisher, Review
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
-        fields = "__all__"
+        exclude = ('book',) #since we dont want to give val to book in json so excluding it
+        #fields = "__all__"
 
 
 class BookSerializer(serializers.ModelSerializer):

@@ -2,8 +2,36 @@ from rest_framework.response import Response
 # from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework import status
-from booklistapp.models import Book, Publisher
-from booklistapp.api.serializers import BookSerializer, PublisherSerializer
+from rest_framework import generics
+from booklistapp.models import Book, Publisher, Review
+from booklistapp.api.serializers import BookSerializer, PublisherSerializer, ReviewSerializer
+
+
+# These are concrete view classes <review wali> 
+# In them, we dont have to write CRUD functions, they are predefined
+# Makes the work hassle free
+
+class ReviewCreate(generics.CreateAPIView):
+    serializer_class = ReviewSerializer
+
+    def perform_create(self, serializer):
+        pk = self.kwargs.get('pk')
+        book = Book.objects.get(pk=pk)
+        serializer.save(book=book)
+
+class ReviewList(generics.ListCreateAPIView):
+    # queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    
+    def get_queryset(self):
+        pk = self.kwargs['pk']
+        return Review.objects.filter(book=pk)
+
+
+class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+
 
 class BookListAV(APIView):
     def get(self, request):
@@ -18,6 +46,7 @@ class BookListAV(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:   
             return Response(serializer.errors)
+
 
 class BookDetailAV(APIView):
     def get(self,  request, pk):
@@ -42,6 +71,7 @@ class BookDetailAV(APIView):
         book = Book.objects.get(pk=pk)
         book.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class PublisherListAV(APIView):
     def get(self, request):
