@@ -10,6 +10,8 @@ from booklistapp.models import Book, Publisher, Review
 # here after conversion to JSON we call it in api/views 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    review_user = serializers.StringRelatedField(read_only=True)
+    
     class Meta:
         model = Review
         exclude = ('book',) #since we dont want to give val to book in json so excluding it
