@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework import generics
 from booklistapp.models import Book, Publisher, Review
+from booklistapp.api.permissions import AdminOrReadOnly, ReviewUserOrReadOnly
 from booklistapp.api.serializers import BookSerializer, PublisherSerializer, ReviewSerializer
 
 
@@ -27,6 +28,14 @@ class ReviewCreate(generics.CreateAPIView):
 
         if review_queryset.exists():
             raise ValidationError("You have already reviewed this book!")
+        
+        if book.number_rating == 0:
+            book.avg_rating = serializer.validated_data['rating']
+        else:
+            book.avg_rating = (book.avg_rating + serializer.validated_data['rating'])/2
+        
+        book.number_rating = book.number_rating+1
+
         serializer.save(book=book)
 
 class ReviewList(generics.ListCreateAPIView):
@@ -41,6 +50,7 @@ class ReviewList(generics.ListCreateAPIView):
 class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+    permission_classes = [AdminOrReadOnly]
 
 
 class BookListAV(APIView):
@@ -59,7 +69,7 @@ class BookListAV(APIView):
 
 
 class BookDetailAV(APIView):
-    def get(self,  request, pk):
+    def get(self, request, pk):
         try:
             book  = Book.objects.get(pk=pk)
         except Book.DoesNotExist:

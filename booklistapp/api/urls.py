@@ -4,10 +4,10 @@ from booklistapp.api.views import BookListAV, BookDetailAV, PublisherListAV, Rev
 
 urlpatterns = [
     path('list/', BookListAV.as_view(), name='book_list'),
-    path('<int:pk>', BookDetailAV.as_view(), name='book_detail'),
+    path('<int:pk>/', BookDetailAV.as_view(), name='book_detail'),
     path('publisher_list/', PublisherListAV.as_view(), name='publisher'),
 
-    path('stream/<int:pk>/review-create/', ReviewCreate.as_view(), name='review-create'),
-    path('stream/<int:pk>/review/', ReviewList.as_view(), name='review-list'),
-    path('stream/review/<int:pk>', ReviewDetail.as_view(), name='review-detail')
+    path('<int:pk>/review-create/', ReviewCreate.as_view(), name='review-create'),
+    path('<int:pk>/review/', ReviewList.as_view(), name='review-list'),
+    path('review/<int:pk>/', ReviewDetail.as_view(), name='review-detail')
 ]

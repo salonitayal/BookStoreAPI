@@ -17,11 +17,12 @@ class Book(models.Model):
     genre = models.CharField(max_length=50)
     description = models.CharField(max_length=200)
     no_of_pages = models.IntegerField(default=0)
-    overall_rating = models.IntegerField(default=0)
     published = models.BooleanField(default=True)
     publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE, related_name="book")
     price = models.IntegerField(null=True)
     publish_date = models.DateField(auto_now_add=True, null=True ,blank=True) 
+    avg_rating = models.FloatField(default=0)
+    number_rating = models.IntegerField(default=0)
 
     def __str__(self):
         return self.title
