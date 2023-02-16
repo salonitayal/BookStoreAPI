@@ -4,10 +4,13 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework import generics
+from rest_framework.throttling import UserRateThrottle, AnonRateThrottle, ScopedRateThrottle
+
 from booklistapp.models import Book, Publisher, Review
 from booklistapp.api.permissions import AdminOrReadOnly, ReviewUserOrReadOnly
 from booklistapp.api.serializers import BookSerializer, PublisherSerializer, ReviewSerializer
 
+from booklistapp.api.throttling import ReviewCreateThrottle, ReviewListThrottle
 
 # These are concrete view classes <review wali> 
 # In them, we dont have to write CRUD functions, they are predefined
@@ -15,6 +18,8 @@ from booklistapp.api.serializers import BookSerializer, PublisherSerializer, Rev
 
 class ReviewCreate(generics.CreateAPIView):
     serializer_class = ReviewSerializer
+    throttle_classes = [ReviewCreateThrottle]
+    
 
     def get_queryset(self):
         return Review.objects.all()
@@ -41,6 +46,9 @@ class ReviewCreate(generics.CreateAPIView):
 class ReviewList(generics.ListCreateAPIView):
     # queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "review-data"
+    #throttle_classes = [ReviewCreateThrottle, AnonRateThrottle]
     
     def get_queryset(self):
         pk = self.kwargs['pk']
@@ -51,7 +59,7 @@ class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = [AdminOrReadOnly]
-
+    throttle_classes = [UserRateThrottle, AnonRateThrottle]
 
 class BookListAV(APIView):
     def get(self, request):
